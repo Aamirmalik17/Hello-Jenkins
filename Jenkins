@@ -1,17 +1,9 @@
 pipeline {
     agent any
-
     environment {
         DOCKER_IMAGE = "aamirdockerr/flask-app"
     }
-
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://git@github.com:Aamirmalik17/Hello-Jenkins.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $DOCKER_IMAGE:latest .'
