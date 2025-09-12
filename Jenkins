@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "aamirdockerr/flask-app"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://git@github.com:Aamirmalik17/Hello-Jenkins.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE:latest .'
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'Dockerhub-token-for-jenkins', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push $DOCKER_IMAGE:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                sh '''
+                    docker stop flask-app || true
+                    docker rm flask-app || true
+                    docker run -d -p 5000:5000 --name flask-app $DOCKER_IMAGE:latest
+                '''
+            }
+        }
+    }
+}
