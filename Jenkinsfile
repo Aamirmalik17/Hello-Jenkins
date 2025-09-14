@@ -33,6 +33,18 @@ pipeline {
                 '''
             }
         }
+
+        stage('Port Forwarding') {
+            steps {
+                sh '''
+                    # Kill old port-forward if running
+                    pkill -f "kubectl port-forward" || true
+
+                    # Start new port-forward in background
+                    nohup kubectl port-forward svc/myapp-service 5000:5000 > port-forward.log 2>&1 &
+                '''
+            }
+        }
     }
 
     post {
@@ -41,4 +53,3 @@ pipeline {
         }
     }
 }
-
